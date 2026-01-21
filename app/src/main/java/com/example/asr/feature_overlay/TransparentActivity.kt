@@ -12,187 +12,200 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.example.asr.R
 import com.example.asr.core.utils.Logger
 
 /**
- * Прозрачное Activity для fallback на OEM устройствах
- * Отображает результаты распознавания поверх других приложений
+ * Прозрачное Activity для отображения оверлея с результатами распознавания
+ * Используется как резервный вариант при недоступности системного оверлея
  */
-class TransparentActivity : Activity() {
+class TransparentActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "TransparentActivity"
-        
-        fun start(context: Context) {
-            val intent = Intent(context, TransparentActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            context.startActivity(intent)
-        }
+        private const val OVERLAY_PERMISSION_REQUEST_CODE = 1001
+        const val EXTRA_RESULT_TEXT = "com.example.asr.EXTRA_RESULT_TEXT"
+        const val EXTRA_IS_FINAL = "com.example.asr.EXTRA_IS_FINAL"
     }
 
     private var windowManager: WindowManager? = null
     private var overlayView: View? = null
+    private var resultTextView: TextView? = null
+    private var copyButton: Button? = null
+    private var isOverlayShown = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Logger.i(TAG, "TransparentActivity created")
         
-        // Проверяем, не отображен ли уже оверлей
-        if (isOverlayDisplayed()) {
-            Logger.i(TAG, "Overlay already displayed in activity, finishing")
+        // Инициализация WindowManager
+        windowManager = getSystemService(Context.WINDOW_SERVICE) as? WindowManager
+        if (windowManager == null) {
+            Logger.e(TAG, "Failed to get WindowManager")
             finish()
             return
         }
-        
-        // Создаем прозрачный оверлей
-        createTransparentOverlay()
-    }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        Logger.i(TAG, "TransparentActivity destroyed")
-        removeOverlay()
-    }
-
-    /**
-     * Проверяет, отображен ли уже оверлей
-     */
-    private fun isOverlayDisplayed(): Boolean {
-        try {
-            // Проверяем, существует ли view в WindowManager
-            windowManager?.let { wm ->
-                val views = wm.views
-                for (view in views) {
-                    if (view === overlayView) {
-                        return true
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            Logger.e(TAG, "Error checking overlay display status", e)
-        }
-        return false
-    }
-
-    /**
-     * Создает прозрачный оверлей для fallback
-     */
-    private fun createTransparentOverlay() {
-        try {
-            // Создаем View для оверлея
-            val layoutInflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
-            overlayView = layoutInflater.inflate(R.layout.overlay_popup, null)
-            
-            // Проверяем, что view успешно создано
-            if (overlayView == null) {
-                Logger.e(TAG, "Failed to inflate overlay layout")
-                finish()
-                return
-            }
-            
-            // Настраиваем текст
-            val resultTextView = overlayView?.findViewById<TextView>(R.id.textViewResult)
-            resultTextView?.text = "Результат распознавания будет отображаться здесь"
-            
-            // Настраиваем кнопки
-            val copyButton = overlayView?.findViewById<Button>(R.id.buttonCopy)
-            val closeButton = overlayView?.findViewById<Button>(R.id.buttonClose)
-            
-            copyButton?.setOnClickListener {
-                copyToClipboard()
-            }
-            
-            closeButton?.setOnClickListener {
-                finish()
-            }
-            
-            // Настройка параметров WindowManager
-            val layoutParams = WindowManager.LayoutParams().apply {
-                width = WindowManager.LayoutParams.MATCH_PARENT
-                height = WindowManager.LayoutParams.WRAP_CONTENT
-                gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-                format = PixelFormat.TRANSLUCENT
-                
-                // Для прозрачного Activity используем тип TYPE_APPLICATION_OVERLAY
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-                } else {
-                    type = WindowManager.LayoutParams.TYPE_PHONE
-                }
-                
-                // Оставляем только необходимые флаги для взаимодействия с элементами
-                flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                
-                // Устанавливаем цвет фона прозрачным
-                windowAnimations = android.R.style.Animation_Dialog
-                
-                // Устанавливаем margin для отступа от краев
-                x = 0
-                y = 100
-            }
-            
-            // Добавляем оверлей в WindowManager
-            windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-            windowManager?.addView(overlayView, layoutParams)
-            
-            Logger.i(TAG, "Transparent overlay created and displayed successfully")
-        } catch (e: Exception) {
-            Logger.e(TAG, "Failed to create transparent overlay", e)
-            Toast.makeText(this, "Ошибка отображения оверлея", Toast.LENGTH_SHORT).show()
+        // Проверяем и запрашиваем разрешение на отображение оверлея
+        if (!checkOverlayPermission()) {
+            Logger.w(TAG, "Missing SYSTEM_ALERT_WINDOW permission")
             finish()
+            return
+        }
+
+        // Создаем и показываем оверлей
+        showOverlay()
+    }
+
+    /**
+     * Проверяет наличие разрешения SYSTEM_ALERT_WINDOW
+     */
+    private fun checkOverlayPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            android.provider.Settings.canDrawOverlays(this)
+        } else {
+            // Для Android < 6.0 разрешение не требуется
+            true
+        }
+    }
+
+    /**
+     * Показывает оверлей с результатами распознавания
+     */
+    private fun showOverlay() {
+        if (isOverlayShown) {
+            Logger.w(TAG, "Overlay is already shown")
+            return
+        }
+
+        try {
+            // Создаем view для оверлея
+            val inflater = LayoutInflater.from(this)
+            overlayView = inflater.inflate(R.layout.overlay_popup, null)
+
+            resultTextView = overlayView?.findViewById(R.id.result_text_view)
+            copyButton = overlayView?.findViewById(R.id.copy_button)
+
+            // Настройка кнопки копирования
+            copyButton?.setOnClickListener {
+                overlayView?.let { view ->
+                    val text = resultTextView?.text.toString()
+                    copyToClipboard(text)
+                }
+            }
+
+            // Настройка параметров оверлея
+            val params = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                } else {
+                    @Suppress("DEPRECATION")
+                    WindowManager.LayoutParams.TYPE_PHONE
+                },
+                // Исправленные флаги для оверлея
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR,
+                PixelFormat.TRANSLUCENT
+            )
+
+            params.gravity = Gravity.TOP or Gravity.START
+            params.x = 100
+            params.y = 100
+
+            // Добавляем view в окно
+            windowManager?.addView(overlayView, params)
+            isOverlayShown = true
+            Logger.i(TAG, "Overlay shown successfully")
+        } catch (e: Exception) {
+            Logger.e(TAG, "Error showing overlay", e)
+            isOverlayShown = false
+            finish() // Закрываем activity в случае ошибки
         }
     }
 
     /**
      * Копирует текст в буфер обмена
      */
-    private fun copyToClipboard() {
+    private fun copyToClipboard(text: String) {
         try {
-            val resultTextView = overlayView?.findViewById<TextView>(R.id.textViewResult)
-            val text = resultTextView?.text.toString()
-            
-            if (text.isNotEmpty()) {
-                // Используем современный способ копирования для Android 10+
-                val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                
-                val clip = android.content.ClipData.newPlainText("Recognition Result", text)
-                
-                clipboardManager.setPrimaryClip(clip)
-                
-                Toast.makeText(this, "Результат скопирован в буфер обмена", Toast.LENGTH_SHORT).show()
+            val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
+            if (clipboardManager != null) {
+                val clipData = android.content.ClipData.newPlainText("speech_result", text)
+                clipboardManager.setPrimaryClip(clipData)
+                Logger.i(TAG, "Text copied to clipboard")
             } else {
-                Toast.makeText(this, "Нет текста для копирования", Toast.LENGTH_SHORT).show()
+                Logger.w(TAG, "Clipboard manager is null")
             }
         } catch (e: Exception) {
-            Logger.e(TAG, "Failed to copy text to clipboard", e)
-            Toast.makeText(this, "Ошибка копирования в буфер обмена", Toast.LENGTH_SHORT).show()
+            Logger.e(TAG, "Error copying to clipboard", e)
         }
     }
 
     /**
-     * Удаляет оверлей из WindowManager
+     * Обновляет текст результата в оверlays
      */
-    private fun removeOverlay() {
+    private fun updateResult(resultText: String, isFinal: Boolean) {
         try {
-            // Проверяем, что Activity не завершается и view существует
-            if (!isFinishing && overlayView != null) {
-                windowManager?.removeView(overlayView)
-                Logger.i(TAG, "Transparent overlay removed successfully")
-                overlayView = null // Сбрасываем ссылку для предотвращения утечек
+            resultTextView?.let { textView ->
+                // Обновляем текст с учетом финальности результата
+                if (isFinal) {
+                    textView.text = resultText
+                } else {
+                    // Для промежуточных результатов добавляем точку в конце
+                    textView.text = "$resultText..."
+                }
             }
         } catch (e: Exception) {
-            Logger.e(TAG, "Failed to remove transparent overlay", e)
+            Logger.e(TAG, "Error updating result text", e)
         }
     }
 
     /**
-     * Завершает Activity
+     * Скрывает оверлей и завершает activity
      */
-    override fun finish() {
-        super.finish()
-        // Убедимся, что оверлей удален при завершении
-        removeOverlay()
+    private fun hideOverlay() {
+        if (!isOverlayShown) {
+            Logger.w(TAG, "Overlay is not shown")
+            return
+        }
+
+        try {
+            overlayView?.let { view ->
+                windowManager?.removeView(view)
+                overlayView = null
+                resultTextView = null
+                copyButton = null
+                isOverlayShown = false
+                Logger.i(TAG, "Overlay hidden successfully")
+            }
+        } catch (e: Exception) {
+            Logger.e(TAG, "Error hiding overlay", e)
+        }
+    }
+
+    /**
+     * Проверяет, отображается ли оверлей
+     */
+    private fun isOverlayDisplayed(): Boolean {
+        // Используем флаг состояния вместо windowManager.views
+        return isOverlayShown
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Logger.i(TAG, "TransparentActivity destroyed")
+        
+        // Очищаем ресурсы
+        hideOverlay()
+        windowManager = null
+    }
+
+    override fun onBackPressed() {
+        // Закрываем оверлей и завершаем activity при нажатии назад
+        hideOverlay()
+        super.onBackPressed()
     }
 }
