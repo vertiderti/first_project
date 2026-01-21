@@ -7,99 +7,123 @@ import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
+import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.example.asr.R
 import com.example.asr.core.utils.Logger
 
 /**
- * Сервис для отображения оверлея поверх других приложений
- * Отображает результаты распознавания с возможностью копирования и закрытия
+ * Сервис для отображения оверлея с результатами распознавания
  */
 class OverlayService : Service() {
 
     companion object {
         private const val TAG = "OverlayService"
-        private const val AUTO_CLOSE_DELAY_MS = 10000L // 10 секунд
         private const val OVERLAY_PERMISSION_REQUEST_CODE = 1001
+        const val ACTION_SHOW_OVERLAY = "com.example.asr.ACTION_SHOW_OVERLAY"
+        const val ACTION_HIDE_OVERLAY = "com.example.asr.ACTION_HIDE_OVERLAY"
+        const val ACTION_UPDATE_RESULT = "com.example.asr.ACTION_UPDATE_RESULT"
         const val EXTRA_RESULT_TEXT = "com.example.asr.EXTRA_RESULT_TEXT"
-        
-        fun startService(context: Context) {
-            val intent = Intent(context, OverlayService::class.java)
-            ContextCompat.startForegroundService(context, intent)
-        }
-        
-        /**
-         * Обновляет текст в оверлее
-         */
-        fun updateResultText(context: Context, text: String) {
-            val intent = Intent(context, OverlayService::class.java)
-            intent.action = "UPDATE_TEXT"
-            intent.putExtra(EXTRA_RESULT_TEXT, text)
-            ContextCompat.startForegroundService(context, intent)
-        }
+        const val EXTRA_IS_FINAL = "com.example.asr.EXTRA_IS_FINAL"
+        private const val AUTO_HIDE_DELAY_MS = 30000 // 30 секунд
     }
 
     private var windowManager: WindowManager? = null
     private var overlayView: View? = null
+    private var resultTextView: TextView? = null
+    private var copyButton: Button? = null
     private var handler: Handler? = null
-    private var autoCloseRunnable: Runnable? = null
+    private var isOverlayShown = false
+    private var autoHideRunnable: Runnable? = null
 
     override fun onCreate() {
         super.onCreate()
         Logger.i(TAG, "OverlayService created")
+        windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         handler = Handler()
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
-    }
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Logger.i(TAG, "OverlayService started")
-        
-        // Проверяем разрешение SYSTEM_ALERT_WINDOW
-        if (!checkOverlayPermission()) {
-            Logger.w(TAG, "SYSTEM_ALERT_WINDOW permission not granted")
-            stopSelf()
-            return START_NOT_STICKY
+        when (intent?.action) {
+            ACTION_SHOW_OVERLAY -> showOverlay()
+            ACTION_HIDE_OVERLAY -> hideOverlay()
+            ACTION_UPDATE_RESULT -> updateResult(intent)
         }
-
-        // Обрабатываем обновление текста
-        if (intent?.action == "UPDATE_TEXT") {
-            val newText = intent.getStringExtra(EXTRA_RESULT_TEXT)
-            if (!newText.isNullOrEmpty()) {
-                updateResultText(newText)
-            }
-            return START_NOT_STICKY
-        }
-
-        // Проверяем, не отображен ли уже оверлей
-        if (isOverlayDisplayed()) {
-            Logger.i(TAG, "Overlay already displayed, ignoring new request")
-            return START_STICKY
-        }
-
-        // Создаем и отображаем оверлей
-        createAndShowOverlay()
-        
-        // Запускаем таймер автоматического закрытия
-        startAutoCloseTimer()
-        
         return START_STICKY
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        Logger.i(TAG, "OverlayService destroyed")
-        removeOverlay()
-        handler?.removeCallbacksAndMessages(null)
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    /**
+     * Показывает оверлей с результатами распознавания
+     */
+    private fun showOverlay() {
+        // Проверяем разрешение SYSTEM_ALERT_WINDOW
+        if (!checkOverlayPermission()) {
+            Logger.w(TAG, "Missing SYSTEM_ALERT_WINDOW permission")
+            return
+        }
+
+        if (isOverlayShown) {
+            Logger.w(TAG, "Overlay is already shown - updating existing overlay")
+            // Если оверлей уже показан, обновляем его содержимое
+            updateExistingOverlay()
+            return
+        }
+
+        try {
+            // Создаем view для оверлея
+            val inflater = LayoutInflater.from(this)
+            overlayView = inflater.inflate(R.layout.overlay_popup, null)
+
+            resultTextView = overlayView?.findViewById(R.id.result_text_view)
+            copyButton = overlayView?.findViewById(R.id.copy_button)
+
+            // Настройка кнопки копирования
+            copyButton?.setOnClickListener {
+                overlayView?.let { view ->
+                    val text = resultTextView?.text.toString()
+                    copyToClipboard(text)
+                }
+            }
+
+            // Настройка параметров оверлея
+            val params = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                } else {
+                    @Suppress("DEPRECATION")
+                    WindowManager.LayoutParams.TYPE_PHONE
+                },
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR,
+                PixelFormat.TRANSLUCENT
+            )
+
+            params.gravity = Gravity.TOP or Gravity.START
+            params.x = 100
+            params.y = 100
+
+            // Добавляем view в окно
+            windowManager?.addView(overlayView, params)
+            isOverlayShown = true
+            Logger.i(TAG, "Overlay shown successfully")
+            
+            // Запускаем таймер автоматического скрытия
+            startAutoHideTimer()
+        } catch (e: Exception) {
+            Logger.e(TAG, "Error showing overlay", e)
+            isOverlayShown = false
+        }
     }
 
     /**
@@ -107,7 +131,7 @@ class OverlayService : Service() {
      */
     private fun checkOverlayPermission(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            android.provider.Settings.canDrawOverlays(this)
+            Settings.canDrawOverlays(this)
         } else {
             // Для Android < 6.0 разрешение не требуется
             true
@@ -115,163 +139,137 @@ class OverlayService : Service() {
     }
 
     /**
-     * Проверяет, отображен ли уже оверлей
+     * Обновляет существующий оверлей вместо его повторного создания
      */
-    private fun isOverlayDisplayed(): Boolean {
+    private fun updateExistingOverlay() {
         try {
-            // Проверяем, существует ли view в WindowManager
-            windowManager?.let { wm ->
-                val views = wm.views
-                for (view in views) {
-                    if (view === overlayView) {
-                        return true
-                    }
-                }
-            }
+            // Можно обновить текст или другие элементы оверлея
+            Logger.i(TAG, "Updating existing overlay content")
+            // Например: обновить содержимое TextView если нужно
+            // В данном случае оверлей уже отображен, так что ничего не меняем
+            // Но можно добавить логику обновления содержимого
         } catch (e: Exception) {
-            Logger.e(TAG, "Error checking overlay display status", e)
+            Logger.e(TAG, "Error updating existing overlay", e)
         }
-        return false
     }
 
     /**
-     * Создает и отображает оверлей
+     * Скрывает оверлей
      */
-    private fun createAndShowOverlay() {
+    private fun hideOverlay() {
+        if (!isOverlayShown) {
+            Logger.w(TAG, "Overlay is not shown")
+            return
+        }
+
         try {
-            // Создаем View для оверлея
-            val layoutInflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
-            overlayView = layoutInflater.inflate(R.layout.overlay_popup, null)
-            
-            // Проверяем, что view успешно создано
-            if (overlayView == null) {
-                Logger.e(TAG, "Failed to inflate overlay layout")
-                stopSelf()
-                return
-            }
-            
-            // Настраиваем текст
-            val resultTextView = overlayView?.findViewById<TextView>(R.id.textViewResult)
-            resultTextView?.text = "Результат распознавания будет отображаться здесь"
-            
-            // Настраиваем кнопки
-            val copyButton = overlayView?.findViewById<Button>(R.id.buttonCopy)
-            val closeButton = overlayView?.findViewById<Button>(R.id.buttonClose)
-            
-            copyButton?.setOnClickListener {
-                copyToClipboard()
-            }
-            
-            closeButton?.setOnClickListener {
-                stopSelf()
-            }
-            
-            // Настройка параметров WindowManager
-            val layoutParams = WindowManager.LayoutParams().apply {
-                width = WindowManager.LayoutParams.MATCH_PARENT
-                height = WindowManager.LayoutParams.WRAP_CONTENT
-                gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-                format = PixelFormat.TRANSLUCENT
+            overlayView?.let { view ->
+                windowManager?.removeView(view)
+                overlayView = null
+                resultTextView = null
+                copyButton = null
+                isOverlayShown = false
+                Logger.i(TAG, "Overlay hidden successfully")
                 
-                // Используем правильный тип для разных версий Android
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                // Останавливаем таймер автоматического скрытия
+                stopAutoHideTimer()
+            }
+        } catch (e: Exception) {
+            Logger.e(TAG, "Error hiding overlay", e)
+        }
+    }
+
+    /**
+     * Обновляет текст результата в оверlays
+     */
+    private fun updateResult(intent: Intent) {
+        val resultText = intent.getStringExtra(EXTRA_RESULT_TEXT) ?: return
+        val isFinal = intent.getBooleanExtra(EXTRA_IS_FINAL, false)
+
+        try {
+            resultTextView?.let { textView ->
+                // Обновляем текст с учетом финальности результата
+                if (isFinal) {
+                    textView.text = resultText
                 } else {
-                    type = WindowManager.LayoutParams.TYPE_PHONE
+                    // Для промежуточных результатов добавляем точку в конце
+                    textView.text = "$resultText..."
                 }
                 
-                // Оставляем только необходимые флаги для взаимодействия с элементами
-                flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                
-                // Устанавливаем margin для отступа от краев
-                x = 0
-                y = 100
+                // Перезапускаем таймер автоматического скрытия при обновлении результата
+                restartAutoHideTimer()
             }
-            
-            // Добавляем оверлей в WindowManager
-            windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-            windowManager?.addView(overlayView, layoutParams)
-            
-            Logger.i(TAG, "Overlay created and displayed successfully")
         } catch (e: Exception) {
-            Logger.e(TAG, "Failed to create overlay", e)
-            Toast.makeText(this, "Ошибка отображения оверлея", Toast.LENGTH_SHORT).show()
-            stopSelf()
+            Logger.e(TAG, "Error updating result text", e)
         }
-    }
-
-    /**
-     * Обновляет текст в оверлее
-     */
-    private fun updateResultText(newText: String) {
-        try {
-            val resultTextView = overlayView?.findViewById<TextView>(R.id.textViewResult)
-            resultTextView?.text = newText
-            Logger.i(TAG, "Overlay text updated to: $newText")
-        } catch (e: Exception) {
-            Logger.e(TAG, "Failed to update overlay text", e)
-        }
-    }
-
-    /**
-     * Запускает таймер автоматического закрытия
-     */
-    private fun startAutoCloseTimer() {
-        autoCloseRunnable = Runnable {
-            Logger.i(TAG, "Auto closing overlay after $AUTO_CLOSE_DELAY_MS ms")
-            stopSelf()
-        }
-        
-        handler?.postDelayed(autoCloseRunnable!!, AUTO_CLOSE_DELAY_MS)
     }
 
     /**
      * Копирует текст в буфер обмена
      */
-    private fun copyToClipboard() {
+    private fun copyToClipboard(text: String) {
         try {
-            val resultTextView = overlayView?.findViewById<TextView>(R.id.textViewResult)
-            val text = resultTextView?.text.toString()
-            
-            if (text.isNotEmpty()) {
-                // Используем современный способ копирования для Android 10+
-                val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                
-                val clip = android.content.ClipData.newPlainText("Recognition Result", text)
-                
-                clipboardManager.setPrimaryClip(clip)
-                
-                Toast.makeText(this, "Результат скопирован в буфер обмена", Toast.LENGTH_SHORT).show()
+            val clipboardManager = ContextCompat.getSystemService(this, android.content.ClipboardManager::class.java)
+            if (clipboardManager != null) {
+                val clipData = android.content.ClipData.newPlainText("speech_result", text)
+                clipboardManager.setPrimaryClip(clipData)
+                Logger.i(TAG, "Text copied to clipboard")
             } else {
-                Toast.makeText(this, "Нет текста для копирования", Toast.LENGTH_SHORT).show()
+                Logger.w(TAG, "Clipboard manager is null")
             }
         } catch (e: Exception) {
-            Logger.e(TAG, "Failed to copy text to clipboard", e)
-            Toast.makeText(this, "Ошибка копирования в буфер обмена", Toast.LENGTH_SHORT).show()
+            Logger.e(TAG, "Error copying to clipboard", e)
         }
     }
 
     /**
-     * Удаляет оверлей из WindowManager
+     * Проверяет, отображается ли оверлей
      */
-    private fun removeOverlay() {
-        try {
-            overlayView?.let { view ->
-                windowManager?.removeView(view)
-                Logger.i(TAG, "Overlay removed successfully")
-                overlayView = null // Сбрасываем ссылку для предотвращения утечек
-            }
-        } catch (e: Exception) {
-            Logger.e(TAG, "Failed to remove overlay", e)
-        }
+    private fun isOverlayDisplayed(): Boolean {
+        // Вместо windowManager.views используем флаг состояния
+        return isOverlayShown
     }
 
     /**
-     * Обработка удаления задачи
+     * Запускает таймер автоматического скрытия оверлея
      */
-    override fun onTaskRemoved(rootIntent: Intent?) {
-        super.onTaskRemoved(rootIntent)
-        Logger.i(TAG, "OverlayService task removed")
-        stopSelf()
+    private fun startAutoHideTimer() {
+        stopAutoHideTimer()
+        
+        autoHideRunnable = Runnable {
+            hideOverlay()
+        }
+        
+        handler?.let { 
+            it.postDelayed(autoHideRunnable!!, AUTO_HIDE_DELAY_MS)
+        } ?: Logger.w(TAG, "Handler is null, cannot start auto hide timer")
+    }
+
+    /**
+     * Останавливает таймер автоматического скрытия оверлея
+     */
+    private fun stopAutoHideTimer() {
+        autoHideRunnable?.let { runnable ->
+            handler?.removeCallbacks(runnable)
+        }
+        autoHideRunnable = null
+    }
+
+    /**
+     * Перезапускает таймер автоматического скрытия оверлея
+     */
+    private fun restartAutoHideTimer() {
+        startAutoHideTimer()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Logger.i(TAG, "OverlayService destroyed")
+        
+        // Очищаем ресурсы
+        hideOverlay()
+        handler?.removeCallbacksAndMessages(null)
+        handler = null
+        windowManager = null
     }
 }
