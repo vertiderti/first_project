@@ -31,6 +31,12 @@
             android:foregroundServiceType="mediaProjection"
             android:exported="false" />
 
+        <!-- RecognitionService -->
+        <service
+            android:name=".feature_overlay.RecognitionService"
+            android:foregroundServiceType="mediaProjection"
+            android:exported="false" />
+
         <!-- TransparentActivity fallback -->
         <activity
             android:name=".feature_overlay.TransparentActivity"
