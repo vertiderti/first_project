@@ -1,6 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+    
+    <!-- Overlay colors -->
+    <color name="overlay_background">#FF000000</color>
+    <color name="overlay_text">#FFFFFFFF</color>
+    <color name="overlay_text_secondary">#B3FFFFFF</color>
+    <color name="overlay_button_background">#33FFFFFF</color>
+    <color name="overlay_button_text">#FFFFFFFF</color>
+    <color name="overlay_button_background_pressed">#66FFFFFF</color>
+    
+    <!-- Status colors -->
+    <color name="status_success">#4CAF50</color>
+    <color name="status_error">#F44336</color>
+    <color name="status_warning">#FF9800</color>
+    <color name="status_info">#2196F3</color>
+    
+    <!-- UI elements -->
+    <color name="transparent">#00000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="gray_100">#FFF5F5F5</color>
+    <color name="gray_200">#FFE0E0E0</color>
+    <color name="gray_300">#FFCCCCCC</color>
+    <color name="gray_400">#FF9E9E9E</color>
+    <color name="gray_500">#FF757575</color>
+    <color name="gray_600">#FF616161</color>
+    <color name="gray_700">#FF424242</color>
+    <color name="gray_800">#FF333333</color>
+    <color name="gray_900">#FF212121</color>
+    
+    <!-- Button colors -->
+    <color name="button_primary_background">#6200EE</color>
+    <color name="button_primary_text">#FFFFFFFF</color>
+    <color name="button_secondary_background">#3700B3</color>
+    <color name="button_secondary_text">#FFFFFFFF</color>
+    <color name="button_disabled_background">#B3B3B3</color>
+    <color name="button_disabled_text">#FFFFFF</color>
+    
+    <!-- Dialog colors -->
+    <color name="dialog_background">#FFFFFFFF</color>
+    <color name="dialog_title_text">#FF212121</color>
+    <color name="dialog_message_text">#FF757575</color>
+    <color name="dialog_positive_button_text">#6200EE</color>
+    <color name="dialog_negative_button_text">#FF0000</color>
+    
+    <!-- Toast colors -->
+    <color name="toast_background">#FF333333</color>
+    <color name="toast_text">#FFFFFFFF</color>
+    
+    <!-- Status bar and navigation bar -->
+    <color name="status_bar_background">#FF000000</color>
+    <color name="navigation_bar_background">#FF000000</color>
+    
+    <!-- Theme colors for dark mode -->
+    <color name="dark_overlay_background">#FF121212</color>
+    <color name="dark_overlay_text">#FFFFFFFF</color>
+    <color name="dark_overlay_button_background">#33FFFFFF</color>
+    <color name="dark_overlay_button_text">#FFFFFFFF</color>
+    
+    <!-- Success and error states -->
+    <color name="success_background">#E8F5E9</color>
+    <color name="success_text">#2E7D32</color>
+    <color name="error_background">#FFEBEE</color>
+    <color name="error_text">#C62828</color>
+    <color name="warning_background">#FFF3E0</color>
+    <color name="warning_text">#EF6C00</color>
+    
+    <!-- Progress indicator colors -->
+    <color name="progress_bar_primary">#6200EE</color>
+    <color name="progress_bar_secondary">#03DAC5</color>
+    
+    <!-- Separator and divider -->
+    <color name="divider_color">#1F000000</color>
+    
+    <!-- Card background -->
+    <color name="card_background">#FFFFFFFF</color>
+    
+    <!-- Text colors for different contexts -->
+    <color name="text_primary">#DE000000</color> <!-- 87% alpha -->
+    <color name="text_secondary">#8A000000</color> <!-- 54% alpha -->
+    <color name="text_disabled">#61000000</color> <!-- 38% alpha -->
+    
+    <!-- Dark theme text colors -->
+    <color name="dark_text_primary">#FFFFFFFF</color>
+    <color name="dark_text_secondary">#B3FFFFFF</color>
+    <color name="dark_text_disabled">#80FFFFFF</color>
 </resources>
