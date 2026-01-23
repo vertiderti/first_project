@@ -5,9 +5,9 @@ import ai.vosk.android.RecognizerListener
 import ai.vosk.android.VoskAndroid
 import android.content.Context
 import com.example.asr.core.error.DomainError
+import com.example.asr.core.model.ModelManager
 import com.example.asr.core.utils.Logger
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
@@ -19,7 +19,7 @@ import java.io.File
  */
 class SpeechRecognizer(
     private val context: Context,
-    private val modelPath: String
+    private val modelManager: ModelManager
 ) {
 
     companion object {
@@ -37,48 +37,35 @@ class SpeechRecognizer(
             Logger.i(TAG, "Starting speech recognition for ${audioChunks.size} chunks")
             
             try {
-                // Проверка готовности модели
-                if (!isModelReady()) {
-                    throw DomainError.RecognitionError("Vosk model is not ready: $modelPath")
+                // Загружаем модель через ModelManager
+                val modelFile = modelManager.getModelFile()
+                    ?: throw DomainError.RecognitionError("Vosk model not found or invalid")
+
+                if (!isModelReady(modelFile.absolutePath)) {
+                    throw DomainError.RecognitionError("Vosk model is not ready: ${modelFile.absolutePath}")
                 }
 
                 // Инициализация Vosk
                 VoskAndroid.init(context)
                 Logger.i(TAG, "Vosk initialized successfully")
 
-                val modelDir = File(modelPath)
                 val recognizer = Recognizer(
-                    modelDir.absolutePath,
+                    modelFile.absolutePath,
                     SAMPLE_RATE.toString()
                 )
 
-                // Устанавливаем слушатель для получения результатов
-                recognizer.setListener(object : RecognizerListener {
+                // Создаем listener с обработкой в корутинном контексте
+                val listener = object : RecognizerListener {
                     override fun onResult(result: String) {
-                        Logger.d(TAG, "Received result: $result")
-                        
-                        try {
-                            val recognition = parseRecognitionResult(result, 0)
-                            trySend(recognition)
-                        } catch (e: Exception) {
-                            Logger.e(TAG, "Error parsing recognition result", e)
-                        }
+                        processRecognitionResult(result, 0, isFinal = true)
                     }
 
                     override fun onPartialResult(result: String) {
-                        Logger.d(TAG, "Received partial result: $result")
-                        
-                        try {
-                            val recognition = parseRecognitionResult(result, 0, isFinal = false)
-                            trySend(recognition)
-                        } catch (e: Exception) {
-                            Logger.e(TAG, "Error parsing partial recognition result", e)
-                        }
+                        processRecognitionResult(result, 0, isFinal = false)
                     }
 
                     override fun onError(error: Exception) {
                         Logger.e(TAG, "Recognition error occurred", error)
-                        // Отправляем ошибку в поток
                         trySend(PartialRecognition(
                             text = "",
                             isFinal = false,
@@ -90,40 +77,37 @@ class SpeechRecognizer(
                     }
 
                     override fun onFinalResult(result: String) {
-                        Logger.d(TAG, "Received final result: $result")
-                        
-                        try {
-                            val recognition = parseRecognitionResult(result, 0, isFinal = true)
-                            trySend(recognition)
-                        } catch (e: Exception) {
-                            Logger.e(TAG, "Error parsing final recognition result", e)
-                        }
+                        processRecognitionResult(result, 0, isFinal = true)
                     }
-                })
+                }
 
-                // Обработка каждого чанка с проверкой отмены
+                recognizer.setListener(listener)
+
+                // Обработка чанков без delay() внутри callbackFlow
                 audioChunks.forEachIndexed { index, chunk ->
-                    // Проверка отмены перед каждым чанком
                     if (coroutineContext.job.isCancelled) {
                         recognizer.stop()
                         throw kotlinx.coroutines.CancellationException("Recognition cancelled")
                     }
                     
-                    // Пропуск пустых чанков
-                    if (chunk.isEmpty()) {
+                    if (chunk.isNotEmpty()) {
+                        try {
+                            Logger.d(TAG, "Processing audio chunk $index with size ${chunk.size}")
+                            recognizer.acceptWaveform(chunk, 0, chunk.size)
+                        } catch (e: Exception) {
+                            Logger.e(TAG, "Error processing audio chunk $index", e)
+                            // Не выбрасываем исключение, а отправляем ошибку
+                            trySend(PartialRecognition(
+                                text = "",
+                                isFinal = false,
+                                confidence = 0.0f,
+                                sourceChunkIndex = index,
+                                isError = true,
+                                errorMessage = "Failed to process chunk $index: ${e.message}"
+                            ))
+                        }
+                    } else {
                         Logger.w(TAG, "Empty audio chunk at index $index")
-                        return@forEachIndexed
-                    }
-
-                    try {
-                        // Передаем чанк в распознаватель
-                        recognizer.acceptWaveform(chunk, 0, chunk.size)
-                        
-                        // Асинхронная задержка вместо блокирующей Thread.sleep()
-                        delay(100)
-                    } catch (e: Exception) {
-                        Logger.e(TAG, "Error processing audio chunk $index", e)
-                        throw DomainError.RecognitionError("Failed to process audio chunk $index: ${e.message}")
                     }
                 }
 
@@ -141,6 +125,25 @@ class SpeechRecognizer(
                 }
             }
         }.flowOn(Dispatchers.Default)
+    }
+
+    /**
+     * Обрабатывает результат распознавания и отправляет в поток
+     */
+    private fun processRecognitionResult(result: String, sourceChunkIndex: Int, isFinal: Boolean) {
+        try {
+            val recognition = parseRecognitionResult(result, sourceChunkIndex, isFinal)
+            trySend(recognition)
+        } catch (e: Exception) {
+            Logger.e(TAG, "Error parsing recognition result", e)
+            // Отправляем пустой результат при ошибке парсинга
+            trySend(PartialRecognition(
+                text = "",
+                isFinal = isFinal,
+                confidence = 0.0f,
+                sourceChunkIndex = sourceChunkIndex
+            ))
+        }
     }
 
     /**
@@ -190,11 +193,21 @@ class SpeechRecognizer(
     /**
      * Проверяет готовность модели для использования
      */
-    fun isModelReady(): Boolean {
-        val modelDir = File(modelPath)
-        return modelDir.exists() && 
-               modelDir.isDirectory && 
-               modelDir.listFiles()?.isNotEmpty() == true
+    fun isModelReady(modelPath: String): Boolean {
+        return try {
+            val modelDir = File(modelPath)
+            if (!modelDir.exists()) return false
+            if (!modelDir.isDirectory) return false
+            
+            // Проверяем наличие необходимых файлов модели Vosk
+            val requiredFiles = listOf("model", "words.txt", "hmm", "graph")
+            val files = modelDir.listFiles() ?: return false
+            
+            files.isNotEmpty() && files.any { it.name.contains("model") }
+        } catch (e: Exception) {
+            Logger.e(TAG, "Error checking model readiness", e)
+            false
+        }
     }
 
     /**
