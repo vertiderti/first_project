@@ -1,99 +1,108 @@
 <resources>
-    <string name="app_name">Offline ASR</string>
-    <string name="overlay_title">Расшифровка</string>
-    <string name="copy_button">Копировать</string>
-    <string name="close_button">Закрыть</string>
-    <string name="recognition_in_progress">Распознавание...</string>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
     
-    <!-- Share Receiver Activity -->
-    <string name="share_receiver_title">Обработка аудио</string>
-    <string name="share_receiver_processing">Обработка аудиофайла...</string>
-    <string name="share_receiver_error_invalid_uri">Неверный URI аудиофайла</string>
-    <string name="share_receiver_error_not_audio">Выбранный файл не является аудио</string>
-    <string name="share_receiver_error_no_permission">Нет разрешения на чтение файла</string>
-    <string name="share_receiver_error_service_busy">Система занята, попробуйте позже</string>
+    <!-- Overlay Theme -->
+    <style name="OverlayTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowSoftInputMode">adjustNothing</item>
+    </style>
     
-    <!-- Recognition Service -->
-    <string name="recognition_service_title">Распознавание речи</string>
-    <string name="recognition_service_started">Начало распознавания</string>
-    <string name="recognition_service_completed">Распознавание завершено</string>
-    <string name="recognition_service_error">Ошибка распознавания</string>
+    <!-- Transparent Activity Theme -->
+    <style name="TransparentActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowSoftInputMode">adjustNothing</item>
+    </style>
     
-    <!-- Overlay Service -->
-    <string name="overlay_service_title">Overlay Service</string>
-    <string name="overlay_service_error_no_permission">Нет разрешения на отображение overlay</string>
+    <!-- Overlay Popup Style -->
+    <style name="OverlayPopup" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@drawable/overlay_background</item>
+        <item name="android:textColor">@color/overlay_text</item>
+        <item name="android:background">@drawable/overlay_background</item>
+    </style>
     
-    <!-- Transparent Activity -->
-    <string name="transparent_activity_title">Результат распознавания</string>
+    <!-- Button Styles -->
+    <style name="OverlayButton" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/overlay_button_background</item>
+        <item name="android:textColor">@color/overlay_button_text</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:minWidth">48dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
     
-    <!-- Error Messages -->
-    <string name="error_unknown">Неизвестная ошибка</string>
-    <string name="error_no_audio_data">Нет аудио данных для обработки</string>
-    <string name="error_audio_processing">Ошибка при обработке аудио</string>
-    <string name="error_model_loading">Ошибка загрузки модели</string>
-    <string name="error_recognition_failed">Распознавание не удалось</string>
+    <!-- Text Styles -->
+    <style name="OverlayTextPrimary" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/overlay_text</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
     
-    <!-- Notifications -->
-    <string name="notification_channel_name">Распознавание речи</string>
-    <string name="notification_channel_description">Уведомления о статусе распознавания</string>
-    <string name="notification_recognition_in_progress">Распознавание в процессе...</string>
-    <string name="notification_recognition_completed">Распознавание завершено</string>
+    <style name="OverlayTextSecondary" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/overlay_text_secondary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
     
-    <!-- Permissions -->
-    <string name="permission_storage_rationale">Для распознавания речи необходимо разрешение на чтение файлов</string>
-    <string name="permission_overlay_rationale">Для отображения overlay необходимы права на отображение поверх других приложений</string>
+    <!-- Progress Bar Style -->
+    <style name="OverlayProgressBar" parent="Widget.AppCompat.ProgressBar.Horizontal">
+        <item name="android:progressTint">@color/progress_bar_primary</item>
+        <item name="android:progressBackgroundTint">@color/overlay_text_secondary</item>
+        <item name="android:indeterminateTint">@color/progress_bar_primary</item>
+    </style>
     
-    <!-- UI Elements -->
-    <string name="button_start_recognition">Начать распознавание</string>
-    <string name="button_stop_recognition">Остановить</string>
-    <string name="button_settings">Настройки</string>
-    <string name="button_close">Закрыть</string>
+    <!-- Dark Theme Overlay -->
+    <style name="OverlayTheme.Dark" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@color/dark_overlay_background</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowSoftInputMode">adjustNothing</item>
+    </style>
     
-    <!-- Status Messages -->
-    <string name="status_ready">Готов к распознаванию</string>
-    <string name="status_processing">Обработка аудио...</string>
-    <string name="status_recognizing">Распознавание речи...</string>
-    <string name="status_completed">Завершено</string>
+    <!-- Dialog Styles -->
+    <style name="AppDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:background">@color/dialog_background</item>
+    </style>
     
-    <!-- App Info -->
-    <string name="app_description">Offline ASR - приложение для распознавания речи без интернета</string>
-    <string name="app_version">Версия 1.0</string>
+    <!-- Toast Style -->
+    <style name="ToastStyle" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@drawable/toast_background</item>
+        <item name="android:textColor">@color/toast_text</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:gravity">center</item>
+    </style>
     
-    <!-- Dialogs -->
-    <string name="dialog_title_confirm">Подтверждение</string>
-    <string name="dialog_message_confirm">Вы уверены, что хотите начать распознавание?</string>
-    <string name="dialog_positive_button">Да</string>
-    <string name="dialog_negative_button">Отмена</string>
-    
-    <!-- Toast Messages -->
-    <string name="toast_recognition_started">Распознавание началось</string>
-    <string name="toast_recognition_failed">Ошибка распознавания</string>
-    <string name="toast_result_copied">Результат скопирован в буфер обмена</string>
-    
-    <!-- Accessibility -->
-    <string name="accessibility_overlay_content_description">Overlay для отображения результатов распознавания</string>
-    <string name="accessibility_copy_button_content_description">Кнопка копирования результата</string>
-    <string name="accessibility_close_button_content_description">Кнопка закрытия окна</string>
-    
-    <!-- Language -->
-    <string name="language_russian">Русский</string>
-    <string name="language_english">Английский</string>
-    <string name="language_french">Французский</string>
-    
-    <!-- Settings -->
-    <string name="settings_title">Настройки</string>
-    <string name="settings_language">Язык распознавания</string>
-    <string name="settings_auto_copy">Автоматически копировать результаты</string>
-    <string name="settings_show_overlay">Показывать overlay</string>
-    
-    <!-- Tutorial -->
-    <string name="tutorial_step_1">1. Выберите аудиофайл из меню \"Поделиться\"</string>
-    <string name="tutorial_step_2">2. Приложение начнет распознавание речи</string>
-    <string name="tutorial_step_3">3. Результат отобразится в overlay или в отдельном окне</string>
-    
-    <!-- Feedback -->
-    <string name="feedback_title">Обратная связь</string>
-    <string name="feedback_message">Оцените качество распознавания</string>
-    <string name="feedback_good">Хорошо</string>
-    <string name="feedback_bad">Плохо</string>
+    <!-- Status Bar Style -->
+    <style name="StatusBarStyle" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
+        <item name="android:statusBarColor">@color/status_bar_background</item>
+    </style>
 </resources>
