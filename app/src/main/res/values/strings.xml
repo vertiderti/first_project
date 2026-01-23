@@ -1,4 +1,99 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ASR</string>
+    <string name="app_name">Offline ASR</string>
+    <string name="overlay_title">Расшифровка</string>
+    <string name="copy_button">Копировать</string>
+    <string name="close_button">Закрыть</string>
+    <string name="recognition_in_progress">Распознавание...</string>
+    
+    <!-- Share Receiver Activity -->
+    <string name="share_receiver_title">Обработка аудио</string>
+    <string name="share_receiver_processing">Обработка аудиофайла...</string>
+    <string name="share_receiver_error_invalid_uri">Неверный URI аудиофайла</string>
+    <string name="share_receiver_error_not_audio">Выбранный файл не является аудио</string>
+    <string name="share_receiver_error_no_permission">Нет разрешения на чтение файла</string>
+    <string name="share_receiver_error_service_busy">Система занята, попробуйте позже</string>
+    
+    <!-- Recognition Service -->
+    <string name="recognition_service_title">Распознавание речи</string>
+    <string name="recognition_service_started">Начало распознавания</string>
+    <string name="recognition_service_completed">Распознавание завершено</string>
+    <string name="recognition_service_error">Ошибка распознавания</string>
+    
+    <!-- Overlay Service -->
+    <string name="overlay_service_title">Overlay Service</string>
+    <string name="overlay_service_error_no_permission">Нет разрешения на отображение overlay</string>
+    
+    <!-- Transparent Activity -->
+    <string name="transparent_activity_title">Результат распознавания</string>
+    
+    <!-- Error Messages -->
+    <string name="error_unknown">Неизвестная ошибка</string>
+    <string name="error_no_audio_data">Нет аудио данных для обработки</string>
+    <string name="error_audio_processing">Ошибка при обработке аудио</string>
+    <string name="error_model_loading">Ошибка загрузки модели</string>
+    <string name="error_recognition_failed">Распознавание не удалось</string>
+    
+    <!-- Notifications -->
+    <string name="notification_channel_name">Распознавание речи</string>
+    <string name="notification_channel_description">Уведомления о статусе распознавания</string>
+    <string name="notification_recognition_in_progress">Распознавание в процессе...</string>
+    <string name="notification_recognition_completed">Распознавание завершено</string>
+    
+    <!-- Permissions -->
+    <string name="permission_storage_rationale">Для распознавания речи необходимо разрешение на чтение файлов</string>
+    <string name="permission_overlay_rationale">Для отображения overlay необходимы права на отображение поверх других приложений</string>
+    
+    <!-- UI Elements -->
+    <string name="button_start_recognition">Начать распознавание</string>
+    <string name="button_stop_recognition">Остановить</string>
+    <string name="button_settings">Настройки</string>
+    <string name="button_close">Закрыть</string>
+    
+    <!-- Status Messages -->
+    <string name="status_ready">Готов к распознаванию</string>
+    <string name="status_processing">Обработка аудио...</string>
+    <string name="status_recognizing">Распознавание речи...</string>
+    <string name="status_completed">Завершено</string>
+    
+    <!-- App Info -->
+    <string name="app_description">Offline ASR - приложение для распознавания речи без интернета</string>
+    <string name="app_version">Версия 1.0</string>
+    
+    <!-- Dialogs -->
+    <string name="dialog_title_confirm">Подтверждение</string>
+    <string name="dialog_message_confirm">Вы уверены, что хотите начать распознавание?</string>
+    <string name="dialog_positive_button">Да</string>
+    <string name="dialog_negative_button">Отмена</string>
+    
+    <!-- Toast Messages -->
+    <string name="toast_recognition_started">Распознавание началось</string>
+    <string name="toast_recognition_failed">Ошибка распознавания</string>
+    <string name="toast_result_copied">Результат скопирован в буфер обмена</string>
+    
+    <!-- Accessibility -->
+    <string name="accessibility_overlay_content_description">Overlay для отображения результатов распознавания</string>
+    <string name="accessibility_copy_button_content_description">Кнопка копирования результата</string>
+    <string name="accessibility_close_button_content_description">Кнопка закрытия окна</string>
+    
+    <!-- Language -->
+    <string name="language_russian">Русский</string>
+    <string name="language_english">Английский</string>
+    <string name="language_french">Французский</string>
+    
+    <!-- Settings -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_language">Язык распознавания</string>
+    <string name="settings_auto_copy">Автоматически копировать результаты</string>
+    <string name="settings_show_overlay">Показывать overlay</string>
+    
+    <!-- Tutorial -->
+    <string name="tutorial_step_1">1. Выберите аудиофайл из меню \"Поделиться\"</string>
+    <string name="tutorial_step_2">2. Приложение начнет распознавание речи</string>
+    <string name="tutorial_step_3">3. Результат отобразится в overlay или в отдельном окне</string>
+    
+    <!-- Feedback -->
+    <string name="feedback_title">Обратная связь</string>
+    <string name="feedback_message">Оцените качество распознавания</string>
+    <string name="feedback_good">Хорошо</string>
+    <string name="feedback_bad">Плохо</string>
 </resources>
