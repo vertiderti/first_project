@@ -88,7 +88,7 @@ class ResultDispatcher(
             putExtra(EXTRA_RESULT_TEXT, text)
             putExtra(EXTRA_IS_FINAL, isFinal)
             if (error != null) {
-                putExtra(EXTRA_ERROR_MESSAGE, error.message)
+                putExtra(EXTRA_ERROR_MESSAGE, error.toString())
             }
         }
 
@@ -140,7 +140,7 @@ class ResultDispatcher(
             putExtra(EXTRA_RESULT_TEXT, text)
             putExtra(EXTRA_IS_FINAL, isFinal)
             if (error != null) {
-                putExtra(EXTRA_ERROR_MESSAGE, error.message)
+                putExtra(EXTRA_ERROR_MESSAGE, error.toString())
             }
         }
         

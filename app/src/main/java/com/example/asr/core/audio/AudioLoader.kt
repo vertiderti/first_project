@@ -7,7 +7,7 @@ import com.example.asr.core.utils.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.*
-
+import kotlin.coroutines.cancellation.CancellationException
 /**
  * Загрузчик аудио файлов с поддержкой потоковой обработки и ограничением размера
  */
@@ -99,7 +99,7 @@ class AudioLoader(
             try {
                 val cursor = contentResolver.query(
                     uri,
-                    arrayOf(ContentResolver.COLUMN_SIZE),
+                    arrayOf(ContentResolver.EXTRA_SIZE),
                     null,
                     null,
                     null
@@ -107,7 +107,7 @@ class AudioLoader(
                 
                 cursor?.use {
                     if (it.moveToFirst()) {
-                        it.getLong(it.getColumnIndexOrThrow(ContentResolver.COLUMN_SIZE))
+                        it.getLong(it.getColumnIndexOrThrow(ContentResolver.EXTRA_SIZE))
                     } else {
                         0L
                     }

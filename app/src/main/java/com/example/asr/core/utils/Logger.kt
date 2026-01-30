@@ -137,7 +137,7 @@ object Logger {
      * @param tag тег для идентификации источника лога
      * @param message текст сообщения предупреждения
      */
-    fun w(tag: String, message: String) {
+    fun w(tag: String, message: String, fallbackException: Exception) {
         if (message.isBlank()) {
             Log.w(tag, "Empty warning message")
             return
@@ -163,7 +163,9 @@ object Logger {
     fun logInfo(message: String) {
         i(DEFAULT_TAG, message)
     }
-    
+    fun info(message: String) {
+        i(DEFAULT_TAG, message)
+    }
     /**
      * Логирование ошибок с использованием тега по умолчанию
      * @param message текст сообщения об ошибке
@@ -172,7 +174,9 @@ object Logger {
     fun logError(message: String, throwable: Throwable? = null) {
         e(DEFAULT_TAG, message, throwable)
     }
-    
+    fun error(message: String, throwable: Throwable? = null) {
+        e(DEFAULT_TAG, message, throwable)
+    }
     /**
      * Логирование отладочной информации с использованием тега по умолчанию
      * @param message текст сообщения
@@ -186,9 +190,11 @@ object Logger {
      * @param message текст сообщения предупреждения
      */
     fun logWarning(message: String) {
-        w(DEFAULT_TAG, message)
+        w(DEFAULT_TAG, message, fallbackException)
     }
-    
+    fun warn(message: String) {
+        w(DEFAULT_TAG, message, fallbackException)
+    }
     /**
      * Логирование Throwable с полным стек-трейсом
      * @param tag тег для идентификации источника лога

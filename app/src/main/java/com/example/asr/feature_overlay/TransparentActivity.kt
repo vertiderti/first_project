@@ -1,8 +1,6 @@
 package com.example.asr.feature_overlay
 
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
@@ -48,7 +46,7 @@ class TransparentActivity : AppCompatActivity() {
 
         // Проверяем и запрашиваем разрешение на отображение оверлея
         if (!checkOverlayPermission()) {
-            Logger.w(TAG, "Missing SYSTEM_ALERT_WINDOW permission")
+            Logger.w(TAG, "Missing SYSTEM_ALERT_WINDOW permission", fallbackException)
             finish()
             return
         }
@@ -74,7 +72,7 @@ class TransparentActivity : AppCompatActivity() {
      */
     private fun showOverlay() {
         if (isOverlayShown) {
-            Logger.w(TAG, "Overlay is already shown")
+            Logger.w(TAG, "Overlay is already shown", fallbackException)
             return
         }
 
@@ -83,8 +81,8 @@ class TransparentActivity : AppCompatActivity() {
             val inflater = LayoutInflater.from(this)
             overlayView = inflater.inflate(R.layout.overlay_popup, null)
 
-            resultTextView = overlayView?.findViewById(R.id.result_text_view)
-            copyButton = overlayView?.findViewById(R.id.copy_button)
+            resultTextView = overlayView?.findViewById(R.id.result_text)
+            copyButton = overlayView?.findViewById(R.id.btn_copy)
 
             // Настройка кнопки копирования
             copyButton?.setOnClickListener {
@@ -137,7 +135,7 @@ class TransparentActivity : AppCompatActivity() {
                 clipboardManager.setPrimaryClip(clipData)
                 Logger.i(TAG, "Text copied to clipboard")
             } else {
-                Logger.w(TAG, "Clipboard manager is null")
+                Logger.w(TAG, "Clipboard manager is null", fallbackException)
             }
         } catch (e: Exception) {
             Logger.e(TAG, "Error copying to clipboard", e)
@@ -168,7 +166,7 @@ class TransparentActivity : AppCompatActivity() {
      */
     private fun hideOverlay() {
         if (!isOverlayShown) {
-            Logger.w(TAG, "Overlay is not shown")
+            Logger.w(TAG, "Overlay is not shown", fallbackException)
             return
         }
 

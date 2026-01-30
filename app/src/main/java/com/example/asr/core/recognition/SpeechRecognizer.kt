@@ -107,7 +107,7 @@ class SpeechRecognizer(
                             ))
                         }
                     } else {
-                        Logger.w(TAG, "Empty audio chunk at index $index")
+                        Logger.w(TAG, "Empty audio chunk at index $index", fallbackException)
                     }
                 }
 

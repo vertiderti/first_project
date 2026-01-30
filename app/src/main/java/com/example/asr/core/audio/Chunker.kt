@@ -5,7 +5,6 @@ import com.example.asr.core.utils.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.*
-import kotlin.math.min
 
 /**
  * Разделитель аудио на чанки с ограничением размера (1MB)
@@ -22,7 +21,7 @@ class Chunker(
         private const val MAX_BUFFER_SIZE = 1024 * 1024 // Максимальный размер буфера 1MB
         private const val MAX_CHUNKS_COUNT = 1000 // Ограничение для предотвращения утечек памяти
         private const val WAV_HEADER_SIZE = 44 // Стандартный размер WAV заголовка
-    }
+
 
     /**
      * Разбивает аудио данные на чанки с учетом ограничения размера
@@ -33,7 +32,7 @@ class Chunker(
                 Logger.i(TAG, "Starting chunking of audio data: ${audioData.size} bytes")
                 
                 if (!validateAudioData(audioData)) {
-                    Logger.w(TAG, "Invalid audio data provided for chunking")
+                    Logger.w(TAG, "Invalid audio data provided for chunking", fallbackException)
                     return@withContext emptyList()
                 }
                 
@@ -67,7 +66,11 @@ class Chunker(
                 }
                 
                 if (chunksCount >= MAX_CHUNKS_COUNT && offset < audioData.size) {
-                    Logger.w(TAG, "Maximum chunks count reached ($MAX_CHUNKS_COUNT), data may be truncated")
+                    Logger.w(
+                        TAG,
+                        "Maximum chunks count reached ($MAX_CHUNKS_COUNT), data may be truncated",
+                        fallbackException
+                    )
                 }
                 
                 Logger.i(TAG, "Successfully created ${chunks.size} chunks from audio data")
@@ -123,7 +126,11 @@ class Chunker(
                     
                     // Проверяем ограничение на количество чанков
                     if (chunksCount.size >= MAX_CHUNKS_COUNT) {
-                        Logger.w(TAG, "Maximum chunks count reached ($MAX_CHUNKS_COUNT), stopping streaming")
+                        Logger.w(
+                            TAG,
+                            "Maximum chunks count reached ($MAX_CHUNKS_COUNT), stopping streaming",
+                            fallbackException
+                        )
                         break
                     }
                 }
@@ -216,7 +223,11 @@ class Chunker(
                 
                 // Проверяем наличие корректного WAV заголовка
                 if (audioData.size < wavHeaderSize) {
-                    Logger.w(TAG, "Audio data is smaller than WAV header size, chunking as regular data")
+                    Logger.w(
+                        TAG,
+                        "Audio data is smaller than WAV header size, chunking as regular data",
+                        fallbackException
+                    )
                     return@withContext chunkAudio(audioData)
                 }
                 
@@ -271,7 +282,7 @@ class Chunker(
                 Logger.i(TAG, "Starting unchunking of ${chunks.size} chunks")
                 
                 if (chunks.isEmpty()) {
-                    Logger.w(TAG, "Empty chunk list provided for unchunking")
+                    Logger.w(TAG, "Empty chunk list provided for unchunking", fallbackException)
                     return@withContext ByteArray(0)
                 }
                 
@@ -355,7 +366,7 @@ class Chunker(
      */
     private fun extractSampleRateFromAudio(audioData: ByteArray): Int {
         if (!validateWavFormat(audioData)) {
-            Logger.w(TAG, "Invalid WAV format, using default sample rate")
+            Logger.w(TAG, "Invalid WAV format, using default sample rate", fallbackException)
             return 16000 // стандартное значение
         }
         
@@ -367,7 +378,7 @@ class Chunker(
                             ((audioData[27].toInt() and 0xFF) shl 24)
             return sampleRate
         } catch (e: Exception) {
-            Logger.w(TAG, "Error extracting sample rate, using default")
+            Logger.w(TAG, "Error extracting sample rate, using default", fallbackException)
             return 16000 // стандартное значение
         }
     }
@@ -377,7 +388,7 @@ class Chunker(
      */
     private fun extractBitDepthFromAudio(audioData: ByteArray): Int {
         if (!validateWavFormat(audioData)) {
-            Logger.w(TAG, "Invalid WAV format, using default bit depth")
+            Logger.w(TAG, "Invalid WAV format, using default bit depth", fallbackException)
             return 16 // стандартное значение
         }
         
@@ -387,7 +398,7 @@ class Chunker(
                           ((audioData[35].toInt() and 0xFF) shl 8)
             return bitDepth
         } catch (e: Exception) {
-            Logger.w(TAG, "Error extracting bit depth, using default")
+            Logger.w(TAG, "Error extracting bit depth, using default", fallbackException)
             return 16 // стандартное значение
         }
     }
@@ -397,7 +408,7 @@ class Chunker(
      */
     private fun extractChannelsFromAudio(audioData: ByteArray): Int {
         if (!validateWavFormat(audioData)) {
-            Logger.w(TAG, "Invalid WAV format, using default channels")
+            Logger.w(TAG, "Invalid WAV format, using default channels", fallbackException)
             return 1 // стандартное значение
         }
         
@@ -407,7 +418,7 @@ class Chunker(
                           ((audioData[23].toInt() and 0xFF) shl 8)
             return channels
         } catch (e: Exception) {
-            Logger.w(TAG, "Error extracting channels, using default")
+            Logger.w(TAG, "Error extracting channels, using default", fallbackException)
             return 1 // стандартное значение
         }
     }

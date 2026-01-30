@@ -7,9 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.asr.feature_overlay.RecognitionService
-import com.example.asr.core.error.DomainError
 import com.example.asr.core.utils.Logger
-import java.io.File
 
 /**
  * Activity для обработки входящих аудиофайлов через Share (Intent.ACTION_SEND)
@@ -21,6 +19,9 @@ class ShareReceiverActivity : AppCompatActivity() {
         const val EXTRA_AUDIO_URI = "com.example.asr.EXTRA_AUDIO_URI"
         private const val TAG = "ShareReceiverActivity"
         private const val MAX_FILE_SIZE = 50L * 1024 * 1024 // 50MB
+
+        private const val PREFS_NAME = "recognition"
+        private const val KEY_BUSY = "recognition_busy"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,7 +48,7 @@ class ShareReceiverActivity : AppCompatActivity() {
             // Проверяем, что система не занята
             if (!tryLockBusy()) {
                 Toast.makeText(this, "Система занята", Toast.LENGTH_SHORT).show()
-                Logger.w(TAG, "Service busy, reject new request")
+                Logger.w(TAG, "Service busy, reject new request", fallbackException)
                 return
             }
 
@@ -82,7 +83,7 @@ class ShareReceiverActivity : AppCompatActivity() {
                 }
                 
                 else -> {
-                    Logger.w(TAG, "Unsupported action: ${intent.action}")
+                    Logger.w(TAG, "Unsupported action: ${intent.action}", fallbackException)
                     Toast.makeText(this, "Неподдерживаемое действие", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -273,8 +274,4 @@ class ShareReceiverActivity : AppCompatActivity() {
             MODE_PRIVATE
         )
 
-    companion object {
-        private const val PREFS_NAME = "recognition"
-        private const val KEY_BUSY = "recognition_busy"
-    }
 }

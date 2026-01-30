@@ -1,0 +1,146 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.example.asr"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+9        android:targetSdkVersion="33" />
+10
+11    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+11-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:5:5-77
+11-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:5:22-74
+12    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+12-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:6:5-78
+12-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:6:22-75
+13    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+13-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:7:5-71
+13-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:7:22-68
+14    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+14-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:8:5-80
+14-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:8:22-77
+15
+16    <permission
+16-->[androidx.core:core:1.9.0] C:\Users\Maks\.gradle\caches\9.0-milestone-1\transforms\34a1a5ec27dffd53586a48e6d9c8048c\transformed\core-1.9.0\AndroidManifest.xml:22:5-24:47
+17        android:name="com.example.asr.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+17-->[androidx.core:core:1.9.0] C:\Users\Maks\.gradle\caches\9.0-milestone-1\transforms\34a1a5ec27dffd53586a48e6d9c8048c\transformed\core-1.9.0\AndroidManifest.xml:23:9-81
+18        android:protectionLevel="signature" />
+18-->[androidx.core:core:1.9.0] C:\Users\Maks\.gradle\caches\9.0-milestone-1\transforms\34a1a5ec27dffd53586a48e6d9c8048c\transformed\core-1.9.0\AndroidManifest.xml:24:9-44
+19
+20    <uses-permission android:name="com.example.asr.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+20-->[androidx.core:core:1.9.0] C:\Users\Maks\.gradle\caches\9.0-milestone-1\transforms\34a1a5ec27dffd53586a48e6d9c8048c\transformed\core-1.9.0\AndroidManifest.xml:26:5-97
+20-->[androidx.core:core:1.9.0] C:\Users\Maks\.gradle\caches\9.0-milestone-1\transforms\34a1a5ec27dffd53586a48e6d9c8048c\transformed\core-1.9.0\AndroidManifest.xml:26:22-94
+21
+22    <application
+22-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:10:5-55:19
+23        android:allowBackup="true"
+23-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:11:9-35
+24        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+24-->[androidx.core:core:1.9.0] C:\Users\Maks\.gradle\caches\9.0-milestone-1\transforms\34a1a5ec27dffd53586a48e6d9c8048c\transformed\core-1.9.0\AndroidManifest.xml:28:18-86
+25        android:debuggable="true"
+26        android:extractNativeLibs="true"
+27        android:label="@string/app_name"
+27-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:12:9-41
+28        android:testOnly="true"
+29        android:theme="@style/AppTheme" >
+29-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:13:9-40
+30
+31        <!-- ShareReceiverActivity -->
+32        <activity
+32-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:16:9-25:20
+33            android:name="com.example.asr.feature_share_entry.ShareReceiverActivity"
+33-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:17:13-70
+34            android:exported="true"
+34-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:19:13-36
+35            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+35-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:18:13-72
+36            <intent-filter>
+36-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:20:13-24:29
+37                <action android:name="android.intent.action.SEND" />
+37-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:21:17-69
+37-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:21:25-66
+38
+39                <category android:name="android.intent.category.DEFAULT" />
+39-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:22:17-76
+39-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:22:27-73
+40
+41                <data android:mimeType="audio/*" />
+41-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:23:17-52
+41-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:23:23-49
+42            </intent-filter>
+43        </activity>
+44
+45        <!-- OverlayService -->
+46        <service
+46-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:28:9-31:40
+47            android:name="com.example.asr.feature_overlay.OverlayService"
+47-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:29:13-59
+48            android:exported="false"
+48-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:31:13-37
+49            android:foregroundServiceType="mediaProjection" />
+49-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:30:13-60
+50
+51        <!-- RecognitionService -->
+52        <service
+52-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:34:9-37:40
+53            android:name="com.example.asr.feature_overlay.RecognitionService"
+53-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:35:13-63
+54            android:exported="false"
+54-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:37:13-37
+55            android:foregroundServiceType="mediaProjection" />
+55-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:36:13-60
+56
+57        <!-- TransparentActivity fallback -->
+58        <activity
+58-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:40:9-43:40
+59            android:name="com.example.asr.feature_overlay.TransparentActivity"
+59-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:41:13-64
+60            android:exported="false"
+60-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:43:13-37
+61            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+61-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:42:13-72
+62
+63        <!-- MainActivity (для демонстрации) -->
+64        <activity
+64-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:46:9-53:20
+65            android:name="com.example.asr.MainActivity"
+65-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:47:13-41
+66            android:exported="true" >
+66-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:48:13-36
+67            <intent-filter>
+67-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:49:13-52:29
+68                <action android:name="android.intent.action.MAIN" />
+68-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:50:17-69
+68-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:50:25-66
+69
+70                <category android:name="android.intent.category.LAUNCHER" />
+70-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:51:17-77
+70-->C:\Users\Maks\StudioProjects\first_project\app\src\main\AndroidManifest.xml:51:27-74
+71            </intent-filter>
+72        </activity>
+73
+74        <provider
+74-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Maks\.gradle\caches\9.0-milestone-1\transforms\c91d850901c0fb6eb205d775e4ea10b3\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
+75            android:name="androidx.startup.InitializationProvider"
+75-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Maks\.gradle\caches\9.0-milestone-1\transforms\c91d850901c0fb6eb205d775e4ea10b3\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:25:13-67
+76            android:authorities="com.example.asr.androidx-startup"
+76-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Maks\.gradle\caches\9.0-milestone-1\transforms\c91d850901c0fb6eb205d775e4ea10b3\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:26:13-68
+77            android:exported="false" >
+77-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Maks\.gradle\caches\9.0-milestone-1\transforms\c91d850901c0fb6eb205d775e4ea10b3\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:27:13-37
+78            <meta-data
+78-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Maks\.gradle\caches\9.0-milestone-1\transforms\c91d850901c0fb6eb205d775e4ea10b3\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
+79                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+79-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Maks\.gradle\caches\9.0-milestone-1\transforms\c91d850901c0fb6eb205d775e4ea10b3\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:30:17-75
+80                android:value="androidx.startup" />
+80-->[androidx.emoji2:emoji2:1.2.0] C:\Users\Maks\.gradle\caches\9.0-milestone-1\transforms\c91d850901c0fb6eb205d775e4ea10b3\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:31:17-49
+81            <meta-data
+81-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\Maks\.gradle\caches\9.0-milestone-1\transforms\e576194c5b9c85ec7b799d448972256e\transformed\jetified-lifecycle-process-2.4.1\AndroidManifest.xml:31:13-33:52
+82                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+82-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\Maks\.gradle\caches\9.0-milestone-1\transforms\e576194c5b9c85ec7b799d448972256e\transformed\jetified-lifecycle-process-2.4.1\AndroidManifest.xml:32:17-78
+83                android:value="androidx.startup" />
+83-->[androidx.lifecycle:lifecycle-process:2.4.1] C:\Users\Maks\.gradle\caches\9.0-milestone-1\transforms\e576194c5b9c85ec7b799d448972256e\transformed\jetified-lifecycle-process-2.4.1\AndroidManifest.xml:33:17-49
+84        </provider>
+85    </application>
+86
+87</manifest>

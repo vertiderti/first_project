@@ -7,71 +7,50 @@ import com.example.asr.core.utils.Logger
  * Доменная модель ошибок для ASR приложения
  * Предоставляет унифицированный способ работы с ошибками в доменной области
  */
-sealed class DomainError {
+sealed class DomainError(message: String? = null, cause: Throwable? = null) : Exception(message, cause) {
     companion object {
-        private const val TAG = "DomainError"
+        const val TAG = "DomainError"
     }
-    
-    /**
-     * Ошибка обработки аудио данных
-     */
-    data class AudioProcessingError(val message: String, val cause: Throwable? = null) : DomainError() {
+
+    data class AudioError(val msg: String, val err: Throwable? = null) : DomainError(msg, err) {
         fun log(logger: Logger) {
-            logger.error("Audio processing error: $message", cause)
+            logger.error("Audio processing error: $msg", err)
         }
     }
-    
-    /**
-     * Ошибка распознавания речи
-     */
-    data class RecognitionError(val message: String, val cause: Throwable? = null) : DomainError() {
+
+    data class RecognitionError(val msg: String, val err: Throwable? = null) : DomainError(msg, err) {
         fun log(logger: Logger) {
-            logger.error("Recognition error: $message", cause)
+            logger.error("Recognition error: $msg", err)
         }
     }
-    
-    /**
-     * Ошибка разрешений
-     */
-    data class PermissionError(val message: String, val cause: Throwable? = null) : DomainError() {
+
+    data class PermissionError(val msg: String, val err: Throwable? = null) : DomainError(msg, err) {
         fun log(logger: Logger) {
-            logger.error("Permission error: $message", cause)
+            logger.error("Permission error: $msg", err)
         }
     }
-    
-    /**
-     * Ошибка модели
-     */
-    data class ModelError(val message: String, val cause: Throwable? = null) : DomainError() {
+
+    data class ModelError(val msg: String, val err: Throwable? = null) : DomainError(msg, err) {
         fun log(logger: Logger) {
-            logger.error("Model error: $message", cause)
+            logger.error("Model error: $msg", err)
         }
     }
-    
-    /**
-     * Ошибка сервиса
-     */
-    data class ServiceError(val message: String, val cause: Throwable? = null) : DomainError() {
+
+    data class ServiceError(val msg: String, val err: Throwable? = null) : DomainError(msg, err) {
         fun log(logger: Logger) {
-            logger.error("Service error: $message", cause)
+            logger.error("Service error: $msg", err)
         }
     }
-    
-    /**
-     * Ошибка сети
-     */
-    data class NetworkError(val message: String, val cause: Throwable? = null) : DomainError() {
+
+    data class NetworkError(val msg: String, val err: Throwable? = null) : DomainError(msg, err) {
         fun log(logger: Logger) {
-            logger.error("Network error: $message", cause)
+            logger.error("Network error: $msg", err)
         }
     }
-    
-    /**
-     * Базовый метод для логирования ошибки
-     */
+
     fun log(logger: Logger) {
         when (this) {
-            is AudioProcessingError -> this.log(logger)
+            is AudioError -> this.log(logger)
             is RecognitionError -> this.log(logger)
             is PermissionError -> this.log(logger)
             is ModelError -> this.log(logger)
@@ -79,21 +58,4 @@ sealed class DomainError {
             is NetworkError -> this.log(logger)
         }
     }
-}
-
-/**
- * Расширение для удобного логирования ошибок
- */
-fun DomainError.logWithMetadata(logger: Logger, metadata: Map<String, Any> = emptyMap()) {
-    val fullMessage = buildString {
-        append(this@logWithMetadata::class.simpleName)
-        append(": ")
-        append(this@logWithMetadata.toString())
-        if (metadata.isNotEmpty()) {
-            append(" | Metadata: $metadata")
-        }
-    }
-    
-    Log.e(DomainError.TAG, fullMessage)
-    this.log(logger)
 }

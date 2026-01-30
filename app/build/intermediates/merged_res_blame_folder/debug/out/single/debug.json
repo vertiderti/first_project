@@ -1,0 +1,34 @@
+[
+    {
+        "merged": "com.example.asr.app-merged_res-29:/layout_overlay_popup.xml.flat",
+        "source": "com.example.asr.app-main-31:/layout/overlay_popup.xml"
+    },
+    {
+        "merged": "com.example.asr.app-merged_res-29:/drawable_toast_background.xml.flat",
+        "source": "com.example.asr.app-main-31:/drawable/toast_background.xml"
+    },
+    {
+        "merged": "com.example.asr.app-merged_res-29:/layout_activity_main.xml.flat",
+        "source": "com.example.asr.app-main-31:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.example.asr.app-merged_res-29:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.example.asr.app-main-31:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "com.example.asr.app-merged_res-29:/drawable_overlay_background.xml.flat",
+        "source": "com.example.asr.app-main-31:/drawable/overlay_background.xml"
+    },
+    {
+        "merged": "com.example.asr.app-merged_res-29:/layout_activity_share_receiver.xml.flat",
+        "source": "com.example.asr.app-main-31:/layout/activity_share_receiver.xml"
+    },
+    {
+        "merged": "com.example.asr.app-merged_res-29:/layout_activity_transparent.xml.flat",
+        "source": "com.example.asr.app-main-31:/layout/activity_transparent.xml"
+    },
+    {
+        "merged": "com.example.asr.app-merged_res-29:/drawable_overlay_button_background.xml.flat",
+        "source": "com.example.asr.app-main-31:/drawable/overlay_button_background.xml"
+    }
+]

@@ -66,12 +66,12 @@ class OverlayService : Service() {
     private fun showOverlay() {
         // Проверяем разрешение SYSTEM_ALERT_WINDOW
         if (!checkOverlayPermission()) {
-            Logger.w(TAG, "Missing SYSTEM_ALERT_WINDOW permission")
+            Logger.w(TAG, "Missing SYSTEM_ALERT_WINDOW permission", fallbackException)
             return
         }
 
         if (isOverlayShown) {
-            Logger.w(TAG, "Overlay is already shown - updating existing overlay")
+            Logger.w(TAG, "Overlay is already shown - updating existing overlay", fallbackException)
             // Если оверлей уже показан, обновляем его содержимое
             updateExistingOverlay()
             return
@@ -158,7 +158,7 @@ class OverlayService : Service() {
      */
     private fun hideOverlay() {
         if (!isOverlayShown) {
-            Logger.w(TAG, "Overlay is not shown")
+            Logger.w(TAG, "Overlay is not shown", fallbackException)
             return
         }
 
@@ -203,6 +203,27 @@ class OverlayService : Service() {
             Logger.e(TAG, "Error updating result text", e)
         }
     }
+    public fun updateResultText(intent: Intent) {
+        val resultText = intent.getStringExtra(EXTRA_RESULT_TEXT) ?: return
+        val isFinal = intent.getBooleanExtra(EXTRA_IS_FINAL, false)
+
+        try {
+            resultTextView?.let { textView ->
+                // Обновляем текст с учетом финальности результата
+                if (isFinal) {
+                    textView.text = resultText
+                } else {
+                    // Для промежуточных результатов добавляем точку в конце
+                    textView.text = "$resultText..."
+                }
+
+                // Перезапускаем таймер автоматического скрытия при обновлении результата
+                restartAutoHideTimer()
+            }
+        } catch (e: Exception) {
+            Logger.e(TAG, "Error updating result text", e)
+        }
+    }
 
     /**
      * Копирует текст в буфер обмена
@@ -215,7 +236,7 @@ class OverlayService : Service() {
                 clipboardManager.setPrimaryClip(clipData)
                 Logger.i(TAG, "Text copied to clipboard")
             } else {
-                Logger.w(TAG, "Clipboard manager is null")
+                Logger.w(TAG, "Clipboard manager is null", fallbackException)
             }
         } catch (e: Exception) {
             Logger.e(TAG, "Error copying to clipboard", e)
@@ -242,7 +263,7 @@ class OverlayService : Service() {
         
         handler?.let { 
             it.postDelayed(autoHideRunnable!!, AUTO_HIDE_DELAY_MS)
-        } ?: Logger.w(TAG, "Handler is null, cannot start auto hide timer")
+        } ?: Logger.w(TAG, "Handler is null, cannot start auto hide timer", fallbackException)
     }
 
     /**

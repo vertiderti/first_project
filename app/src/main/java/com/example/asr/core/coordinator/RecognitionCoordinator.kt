@@ -40,7 +40,7 @@ class RecognitionCoordinator(
     init {
         // Проверяем, что список pipeline не пустой
         if (recognitionPipelines.isEmpty()) {
-            Logger.w(TAG, "Warning: recognitionPipelines is empty")
+            Logger.w(TAG, "Warning: recognitionPipelines is empty", fallbackException)
         }
     }
 
@@ -144,7 +144,11 @@ class RecognitionCoordinator(
                     else -> DomainError.UnknownError(e.message ?: "Unknown error occurred")
                 }
                 
-                Logger.w(TAG, "Recognition attempt $attempt failed for $audioUri: ${e.message}")
+                Logger.w(
+                    TAG,
+                    "Recognition attempt $attempt failed for $audioUri: ${e.message}",
+                    fallbackException
+                )
                 
                 // Если это последняя попытка, передаем ошибку
                 if (attempt == retryAttempts - 1) {
